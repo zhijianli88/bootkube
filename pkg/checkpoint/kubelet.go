@@ -2,6 +2,7 @@ package checkpoint
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/golang/glog"
 	"k8s.io/api/core/v1"
@@ -49,9 +50,13 @@ func newKubeletClient(config *rest.Config) (*kubeletClient, error) {
 // localParentPods will retrieve all pods from kubelet api that are parents & should be checkpointed
 func (k *kubeletClient) localParentPods() map[string]*v1.Pod {
 	podList := new(v1.PodList)
-	if err := k.insecureClient.Get().AbsPath("/pods/").Do().Into(podList); err != nil {
-		// Assume there are no local parent pods.
-		glog.Errorf("failed to list local parent pods, assuming none are running: %v", err)
+	timeout := 15 * time.Second
+	if err := k.secureClient.Get().AbsPath("/pods/").Timeout(timeout).Do().Into(podList); err != nil {
+		glog.Errorf("failed to secure list local parent pods, fallback to insecure: %v", err)
+		if err := k.insecureClient.Get().AbsPath("/pods/").Timeout(timeout).Do().Into(podList); err != nil {
+			// Assume there are no local parent pods.
+			glog.Errorf("failed to insecure list local parent pods, assuming none are running: %v", err)
+		}
 	}
 	return podListToParentPods(podList)
 }

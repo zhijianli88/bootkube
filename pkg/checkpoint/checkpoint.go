@@ -110,7 +110,7 @@ func (c *checkpointer) run() {
 	for {
 		time.Sleep(defaultPollingFrequency)
 
-		// We must use both the :10255/pods endpoint and CRI shim, because /pods
+		// We must use both the kubelet /pods endpoint and CRI shim, because /pods
 		// endpoint could have stale data. The /pods endpoint will only show the last cached
 		// status which has successfully been written to an apiserver. However, if there is
 		// no apiserver, we may get stale state (e.g. saying pod is running, when it really is
