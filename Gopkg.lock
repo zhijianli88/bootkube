@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:1cfa8c671a76d1004009bb3768ceb3e3b52859167f74dde475021b7835305ea2"
+  digest = "1:22db66c6af48fe0e93e971d796cad565ee9e0039646bd59bc8e29b7a7bd2d24e"
   name = "github.com/coreos/etcd"
   packages = [
     "auth/authpb",
@@ -13,8 +13,8 @@
     "pkg/types",
   ]
   pruneopts = "NUT"
-  revision = "c9d46ab3799b7f2174268e75f72d01e6d6aac953"
-  version = "v3.3.2"
+  revision = "d57e8b8d97adfc4a6c224fe116714bf1a1f3beb9"
+  version = "v3.3.12"
 
 [[projects]]
   digest = "1:e4b8692750d79c7f6ae587d1f6fc180a1321e81f67b9ba4ac06a6ee90af66675"
@@ -564,6 +564,7 @@
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/klog",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
