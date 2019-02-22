@@ -808,7 +808,6 @@ data:
     .:53 {
         errors
         health
-        log
         kubernetes cluster.local {{ .ServiceCIDR }} {
             pods insecure
             upstream
@@ -829,7 +828,7 @@ metadata:
   name: coredns
   namespace: kube-system
   labels:
-    k8s-app: coredns
+    k8s-app: kube-dns
     kubernetes.io/name: "CoreDNS"
     kubernetes.io/cluster-service: "true"
 spec:
@@ -843,11 +842,11 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      k8s-app: coredns
+      k8s-app: kube-dns
   template:
     metadata:
       labels:
-        k8s-app: coredns
+        k8s-app: kube-dns
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
     spec:
@@ -867,7 +866,7 @@ spec:
               memory: 70Mi
           args: [ "-conf", "/etc/coredns/Corefile" ]
           volumeMounts:
-            - name: config
+            - name: config-volume
               mountPath: /etc/coredns
               readOnly: true
           ports:
@@ -899,7 +898,7 @@ spec:
             readOnlyRootFilesystem: true
       dnsPolicy: Default
       volumes:
-        - name: config
+        - name: config-volume
           configMap:
             name: coredns
             items:
@@ -919,18 +918,18 @@ metadata:
 var CoreDNSSvcTemplate = []byte(`apiVersion: v1
 kind: Service
 metadata:
-  name: coredns
+  name: kube-dns
   namespace: kube-system
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9153"
   labels:
-    k8s-app: coredns
+    k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "CoreDNS"
 spec:
   selector:
-    k8s-app: coredns
+    k8s-app: kube-dns
   clusterIP: {{ .DNSServiceIP }}
   ports:
     - name: dns
