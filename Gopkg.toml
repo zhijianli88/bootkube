@@ -120,3 +120,9 @@ revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
 [[override]]
 name = "google.golang.org/appengine"
 version = "v1.3.0"
+[[override]]
+name = "sigs.k8s.io/yaml"
+revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+[[override]]
+name = "k8s.io/klog"
+revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
