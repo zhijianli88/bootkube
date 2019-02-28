@@ -198,6 +198,15 @@
 		]
 	},
 	{
+		"project": "golang.org/x/oauth2",
+		"licenses": [
+			{
+				"type": "BSD 3-clause \"New\" or \"Revised\" License",
+				"confidence": 0.9663865546218487
+			}
+		]
+	},
+	{
 		"project": "golang.org/x/sys/unix",
 		"licenses": [
 			{
@@ -255,8 +264,8 @@
 		"project": "gopkg.in/yaml.v2",
 		"licenses": [
 			{
-				"type": "GNU Lesser General Public License v3.0",
-				"confidence": 0.9528301886792453
+				"type": "Apache License 2.0",
+				"confidence": 1
 			},
 			{
 				"type": "MIT License",
@@ -297,6 +306,24 @@
 			{
 				"type": "Apache License 2.0",
 				"confidence": 1
+			}
+		]
+	},
+	{
+		"project": "k8s.io/klog",
+		"licenses": [
+			{
+				"type": "Apache License 2.0",
+				"confidence": 0.9966703662597114
+			}
+		]
+	},
+	{
+		"project": "sigs.k8s.io/yaml",
+		"licenses": [
+			{
+				"type": "BSD 3-clause \"New\" or \"Revised\" License",
+				"confidence": 0.8357142857142857
 			}
 		]
 	}

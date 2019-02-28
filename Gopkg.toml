@@ -7,22 +7,22 @@ required = [
   go-tests = true
   unused-packages = true
 
-[[override]]
+[[constraint]]
 name = "k8s.io/api"
-revision = "kubernetes-1.11.2"
+revision = "kubernetes-1.13.3"
 [[constraint]]
 name = "k8s.io/apiextensions-apiserver"
-revision = "kubernetes-1.11.2"
+revision = "kubernetes-1.13.3"
 [[constraint]]
 name = "k8s.io/apimachinery"
-revision = "kubernetes-1.11.2"
+revision = "kubernetes-1.13.3"
 [[constraint]]
 name = "k8s.io/client-go"
-revision = "kubernetes-1.11.2"
+revision = "kubernetes-1.13.3"
 
 [[constraint]]
 name = "github.com/coreos/etcd"
-version = "v3.3.2"
+version = "v3.3.12"
 [[constraint]]
 name = "github.com/ghodss/yaml"
 revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
@@ -71,7 +71,7 @@ name = "github.com/hashicorp/golang-lru"
 revision = "a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4"
 [[override]]
 name = "github.com/imdario/mergo"
-revision = "6633656539c1639d9d78127b7d47c622b5d7b6dc"
+revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
 [[override]]
 name = "github.com/inconshreveable/mousetrap"
 revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -113,4 +113,16 @@ name = "gopkg.in/inf.v0"
 revision = "3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4"
 [[override]]
 name = "gopkg.in/yaml.v2"
-revision = "53feefa2559fb8dfa8d81baad31be332c97d6c77"
+revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+[[override]]
+name = "golang.org/x/oauth2"
+revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
+[[override]]
+name = "google.golang.org/appengine"
+version = "v1.3.0"
+[[override]]
+name = "sigs.k8s.io/yaml"
+revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+[[override]]
+name = "k8s.io/klog"
+revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
