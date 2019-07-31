@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	v1apps "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
-	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -25,8 +25,8 @@ var (
 				Data: map[string]string{"key": "value"},
 			}},
 		},
-		daemonSets: v1beta1.DaemonSetList{
-			Items: []v1beta1.DaemonSet{{
+		daemonSets: v1apps.DaemonSetList{
+			Items: []v1apps.DaemonSet{{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "kube-apiserver",
 					Namespace: "kube-system",
@@ -35,7 +35,7 @@ var (
 						"k8s-app": "kube-apiserver",
 					},
 				},
-				Spec: v1beta1.DaemonSetSpec{
+				Spec: v1apps.DaemonSetSpec{
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{{
@@ -64,8 +64,8 @@ var (
 				},
 			}},
 		},
-		deployments: v1beta1.DeploymentList{
-			Items: []v1beta1.Deployment{{
+		deployments: v1apps.DeploymentList{
+			Items: []v1apps.Deployment{{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "kube-scheduler",
 					Namespace: "kube-system",
@@ -74,7 +74,7 @@ var (
 						"k8s-app": "kube-scheduler",
 					},
 				},
-				Spec: v1beta1.DeploymentSpec{
+				Spec: v1apps.DeploymentSpec{
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{{
@@ -412,8 +412,8 @@ func TestIsNotBootstrapApp(t *testing.T) {
 func TestSetTypeMeta(t *testing.T) {
 	for _, obj := range []runtime.Object{
 		&v1.ConfigMap{},
-		&v1beta1.DaemonSet{},
-		&v1beta1.Deployment{},
+		&v1apps.DaemonSet{},
+		&v1apps.Deployment{},
 		&v1.Pod{},
 		&v1.Secret{},
 	} {

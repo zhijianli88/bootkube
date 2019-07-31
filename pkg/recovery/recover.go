@@ -17,8 +17,8 @@ import (
 	"reflect"
 
 	"github.com/ghodss/yaml"
+	v1apps "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
-	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,8 +63,8 @@ func init() {
 		}
 	}
 	addTypeMeta(&v1.ConfigMap{}, v1.SchemeGroupVersion)
-	addTypeMeta(&v1beta1.DaemonSet{}, v1beta1.SchemeGroupVersion)
-	addTypeMeta(&v1beta1.Deployment{}, v1beta1.SchemeGroupVersion)
+	addTypeMeta(&v1apps.DaemonSet{}, v1apps.SchemeGroupVersion)
+	addTypeMeta(&v1apps.Deployment{}, v1apps.SchemeGroupVersion)
 	addTypeMeta(&v1.Pod{}, v1.SchemeGroupVersion)
 	addTypeMeta(&v1.Secret{}, v1.SchemeGroupVersion)
 }
@@ -77,8 +77,8 @@ type Backend interface {
 // controlPlane holds the control plane objects that are recovered from a backend.
 type controlPlane struct {
 	configMaps  v1.ConfigMapList
-	daemonSets  v1beta1.DaemonSetList
-	deployments v1beta1.DeploymentList
+	daemonSets  v1apps.DaemonSetList
+	deployments v1apps.DeploymentList
 	secrets     v1.SecretList
 }
 
@@ -133,7 +133,7 @@ func (cp *controlPlane) renderBootstrap() (asset.Assets, error) {
 }
 
 // extractBootstrapPods extracts bootstrap pod specs from daemonsets and deployments.
-func extractBootstrapPods(daemonSets []v1beta1.DaemonSet, deployments []v1beta1.Deployment) ([]v1.Pod, error) {
+func extractBootstrapPods(daemonSets []v1apps.DaemonSet, deployments []v1apps.Deployment) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	for _, ds := range daemonSets {
 		if isBootstrapApp(ds.Labels) {

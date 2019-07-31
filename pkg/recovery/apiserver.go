@@ -41,12 +41,12 @@ func (b *apiServerBackend) read(context.Context) (*controlPlane, error) {
 		return nil, err
 	}
 	cp.configMaps = *configMaps
-	deployments, err := b.client.ExtensionsV1beta1().Deployments("kube-system").List(metav1.ListOptions{})
+	deployments, err := b.client.AppsV1().Deployments("kube-system").List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 	cp.deployments = *deployments
-	daemonSets, err := b.client.ExtensionsV1beta1().DaemonSets("kube-system").List(metav1.ListOptions{})
+	daemonSets, err := b.client.AppsV1().DaemonSets("kube-system").List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
