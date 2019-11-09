@@ -32,15 +32,16 @@ Eventually we might want to consider moving the checkpointer to its own repo. Th
 However, this should also be balanced against the longer-term goal, which would be that checkpointing is natively supported in the kubelet.
 
 For some past discussions related to these topics, see:
+
 - https://github.com/kubernetes/kubeadm/issues/131
 - https://github.com/kubernetes/kubernetes/issues/489
-- https://github.com/kubernetes-incubator/bootkube/issues/424
+- https://github.com/kubernetes-sigs/bootkube/issues/424
 
 ## Updating Kubernetes Version
 
 ### Updating Kubernetes vendor code
 
-Vendoring currently relies on the [dep](https://github.com/golang/dep) tool. 
+Vendoring currently relies on the [dep](https://github.com/golang/dep) tool.
 
 - Update pinned versions in `Gopkg.toml`
 - Run `make vendor`
@@ -50,14 +51,14 @@ Note that we require all dependencies be recorded `Gopkg.toml`, even transitive 
 ### Updating hyperkube image / Kubernetes version
 
 - Update hyperkube image for manifests in templates:
-    - `pkg/asset/internal/templates.go`
+  - `pkg/asset/internal/templates.go`
 - Update conformance test version: (`CONFORMANCE_VERSION`)
-    -  `hack/tests/conformance-test.sh`
+  - `hack/tests/conformance-test.sh`
 - Update on-host kubelet versions (`KUBELET_IMAGE_TAG`)
-    - `hack/multi-node/user-data.sample`
-    - `hack/single-node/user-data.sample`
-    - `hack/quickstart/kubelet.master`
-    - `hack/quickstart/kubelet.worker`
+  - `hack/multi-node/user-data.sample`
+  - `hack/single-node/user-data.sample`
+  - `hack/quickstart/kubelet.master`
+  - `hack/quickstart/kubelet.worker`
 
 ## Run conformance test
 
@@ -121,4 +122,3 @@ BUILD_IMAGE=checkpoint PUSH_IMAGE=true ./build/build-image.sh
 In `pkg/asset/images.go` change:
 
 `PodCheckpointer` in `DefaultImages` to use the image built in previous step.
-
