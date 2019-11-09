@@ -27,16 +27,16 @@ Check the current Kubernetes version.
 ```sh
 $ kubectl version
 Client Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.2", GitCommit:"477efc3cbe6a7effca06bd1452fa356e2201e1ee", GitTreeState:"clean", BuildDate:"2017-04-19T20:33:11Z", GoVersion:"go1.7.5", Compiler:"gc", Platform:"linux/amd64"}
-Server Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.6+coreos.1", GitCommit:"42a5c8b99c994a51d9ceaed5d0254f177e97d419", GitTreeState:"clean", BuildDate:"2017-06-21T01:10:07Z", GoVersion:"go1.7.6", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.6", GitCommit:"42a5c8b99c994a51d9ceaed5d0254f177e97d419", GitTreeState:"clean", BuildDate:"2017-06-21T01:10:07Z", GoVersion:"go1.7.6", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
 ```sh
 $ kubectl get nodes
 NAME                               STATUS    AGE       VERSION
-node1.example.com                  Ready     21d       v1.6.6+coreos.1
-node2.example.com                  Ready     21d       v1.6.6+coreos.1
-node3.example.com                  Ready     21d       v1.6.6+coreos.1
-node4.example.com                  Ready     21d       v1.6.6+coreos.1
+node1.example.com                  Ready     21d       v1.6.6
+node2.example.com                  Ready     21d       v1.6.6
+node3.example.com                  Ready     21d       v1.6.6
+node4.example.com                  Ready     21d       v1.6.6
 ```
 
 ## Control Plane
@@ -62,7 +62,7 @@ kube-scheduler                    2         2         2            2           2
 If only the container image version has changed, update the image with a single command.
 
 ```
-kubectl set image daemonset kube-apiserver kube-apiserver=quay.io/coreos/hyperkube:v1.6.7_coreos.0
+kubectl set image daemonset -n kube-system kube-apiserver kube-apiserver=k8s.gcr.io/hyperkube:v1.6.7
 ```
 
 You can edit the daemonset directly if other changes are needed.
@@ -78,7 +78,7 @@ With only one apiserver, the cluster may be momentarily unavailable.
 Again, if only the container image version has changed, update the image with a single command.
 
 ```
-kubectl set image deployment kube-scheduler kube-scheduler=quay.io/coreos/hyperkube:v1.6.7_coreos.0
+kubectl set image deployment -n kube-system kube-scheduler kube-scheduler=k8s.gcr.io/hyperkube:v1.6.7
 ```
 
 You can edit the deployment directly if other changes are needed.
@@ -92,18 +92,24 @@ $ kubectl edit deployments kube-scheduler -n=kube-system
 Again, if only the container image version has changed, update the image with a single command.
 
 ```
-kubectl set image deployment kube-controller-manager kube-controller-manager=quay.io/coreos/hyperkube:v1.6.7_coreos.0
+kubectl set image deployment -n kube-system kube-controller-manager kube-controller-manager=k8s.gcr.io/hyperkube:v1.6.7
 ```
 
 You can edit the deployment directly if other changes are needed.
 
 ```sh
-$ kubectl edit deployments kube-controller-manager -n=kube-system
+$ kubectl edit deployments -n kube-system kube-controller-manager -n=kube-system
 ```
 
 ### kube-proxy
 
-Edit the `kube-proxy` daemonset to rolling update the proxy.
+Again, if only the container image version has changed, update the image with a single command.
+
+```
+kubectl set image daemonset -n kube-system kube-proxy kube-proxy=k8s.gcr.io/hyperkube:v1.6.7
+```
+
+You can edit the deployment directly if other changes are needed.
 
 ```sh
 $ kubectl edit daemonset kube-proxy -n=kube-system
@@ -120,17 +126,10 @@ Verify the control plane components updated.
 ```sh
 $ kubectl version
 Client Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.2", GitCommit:"477efc3cbe6a7effca06bd1452fa356e2201e1ee", GitTreeState:"clean", BuildDate:"2017-04-19T20:33:11Z", GoVersion:"go1.7.5", Compiler:"gc", Platform:"linux/amd64"}
-Server Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.7+coreos.0", GitCommit:"c8c505ee26ac3ab4d1dff506c46bc5538bc66733", GitTreeState:"clean", BuildDate:"2017-07-06T17:38:33Z", GoVersion:"go1.7.6", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.7", GitCommit:"c8c505ee26ac3ab4d1dff506c46bc5538bc66733", GitTreeState:"clean", BuildDate:"2017-07-06T17:38:33Z", GoVersion:"go1.7.6", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-```sh
-$ kubectl get nodes
-NAME                               STATUS    AGE       VERSION
-node1.example.com                  Ready     21d       v1.6.7+coreos.0
-node2.example.com                  Ready     21d       v1.6.7+coreos.0
-node3.example.com                  Ready     21d       v1.6.7+coreos.0
-node4.example.com                  Ready     21d       v1.6.7+coreos.0
-```
+Also, consider running `kubectl -n kube-system get pods` to verify all upgraded pods are running correctly.
 
 ## kubelet
 
@@ -138,6 +137,7 @@ SSH to each node and update the `KUBELET_IMAGE_TAG` in `kubelet.service` or `/et
 
 ```sh
 ssh core@node1.example.com
+# NOTE: KUBELET_IMAGE_TAG may not be used in both files, this is expected
 sudo vim /etc/systemd/system/kubelet.service
 sudo vim /etc/kubernetes/kubelet.env
 sudo systemctl restart kubelet
@@ -149,14 +149,23 @@ Verify the kubelet and kube-proxy of each node updated.
 
 ```sh
 $ kubectl get nodes -o yaml | grep 'kubeletVersion\|kubeProxyVersion'
-      kubeProxyVersion: v1.6.7+coreos.0
-      kubeletVersion: v1.6.7+coreos.0
-      kubeProxyVersion: v1.6.7+coreos.0
-      kubeletVersion: v1.6.7+coreos.0
-      kubeProxyVersion: v1.6.7+coreos.0
-      kubeletVersion: v1.6.7+coreos.0
-      kubeProxyVersion: v1.6.7+coreos.0
-      kubeletVersion: v1.6.7+coreos.0
+      kubeProxyVersion: v1.6.7
+      kubeletVersion: v1.6.7
+      kubeProxyVersion: v1.6.7
+      kubeletVersion: v1.6.7
+      kubeProxyVersion: v1.6.7
+      kubeletVersion: v1.6.7
+      kubeProxyVersion: v1.6.7
+      kubeletVersion: v1.6.7
+```
+
+```sh
+$ kubectl get nodes
+NAME                               STATUS    AGE       VERSION
+node1.example.com                  Ready     21d       v1.6.7
+node2.example.com                  Ready     21d       v1.6.7
+node3.example.com                  Ready     21d       v1.6.7
+node4.example.com                  Ready     21d       v1.6.7
 ```
 
 Kubernetes control plane components have been successfully updated!
