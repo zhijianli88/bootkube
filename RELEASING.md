@@ -41,12 +41,10 @@ For some past discussions related to these topics, see:
 
 ### Updating Kubernetes vendor code
 
-Vendoring currently relies on the [dep](https://github.com/golang/dep) tool.
+Vendoring relies on go modules.
 
-- Update pinned versions in `Gopkg.toml`
+- Run `go get -u` the desired `k8s.io/client-go` version
 - Run `make vendor`
-
-Note that we require all dependencies be recorded `Gopkg.toml`, even transitive dependencies.
 
 ### Updating hyperkube image / Kubernetes version
 
