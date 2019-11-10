@@ -12,7 +12,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/kubernetes-incubator/bootkube/pkg/tlsutil"
+	"github.com/kubernetes-sigs/bootkube/pkg/tlsutil"
 )
 
 const (

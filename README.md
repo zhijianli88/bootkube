@@ -1,8 +1,8 @@
-# Bootkube  
+# Bootkube
 
 [![Build Status](https://travis-ci.org/kubernetes-incubator/bootkube.svg?branch=master)](https://travis-ci.org/kubernetes-incubator/bootkube)
-[![GoDoc](https://godoc.org/github.com/kubernetes-incubator/bootkube?status.svg)](https://godoc.org/github.com/kubernetes-incubator/bootkube)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-incubator/bootkube)](https://goreportcard.com/report/github.com/kubernetes-incubator/bootkube)
+[![GoDoc](https://godoc.org/github.com/kubernetes-sigs/bootkube?status.svg)](https://godoc.org/github.com/kubernetes-sigs/bootkube)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-sigs/bootkube)](https://goreportcard.com/report/github.com/kubernetes-sigs/bootkube)
 
 Bootkube is a tool for launching self-hosted Kubernetes clusters.
 
@@ -12,16 +12,16 @@ Additionally, bootkube can be used to generate all of the necessary assets for u
 
 ## Details of self-hosting
 
-* [KubeCon self-hosted presentation video](https://www.youtube.com/watch?v=EbNxGK9MwN4)
-* [Kubernetes self-hosted design document](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/cluster-lifecycle/self-hosted-kubernetes.md)
+- [KubeCon self-hosted presentation video](https://www.youtube.com/watch?v=EbNxGK9MwN4)
+- [Kubernetes self-hosted design document](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/cluster-lifecycle/self-hosted-kubernetes.md)
 
 ## Guides
 
-* [GCE Quickstart](hack/quickstart/quickstart-gce.md)
-* [AWS Quickstart](hack/quickstart/quickstart-aws.md)
-* [Bare-Metal](https://github.com/coreos/matchbox/tree/master/examples/terraform/bootkube-install)
-* [Vagrant Single-Node](hack/single-node/README.md)
-* [Vagrant Multi-Node](hack/multi-node/README.md)
+- [GCE Quickstart](hack/quickstart/quickstart-gce.md)
+- [AWS Quickstart](hack/quickstart/quickstart-aws.md)
+- [Bare-Metal](https://github.com/coreos/matchbox/tree/master/examples/terraform/bootkube-install)
+- [Vagrant Single-Node](hack/single-node/README.md)
+- [Vagrant Multi-Node](hack/multi-node/README.md)
 
 ## Usage
 
@@ -64,6 +64,7 @@ bootkube start --asset-dir=my-cluster
 ```
 
 When `bootkube start` is creating Kubernetes resources from manifests, the following order is used:
+
 1. Any `Namespace` objects are created, in lexicographical order.
 1. Any `CustomResourceDefinition` objects are created, in lexicographical order.
 1. Any remaining resources are created, in lexicographical order.
@@ -86,7 +87,7 @@ You can find us at the `#bootkube` channel on [Kubernetes slack][slack].
 
 ## Related Links
 
-* [Users and Integrations](Documentation/users-integrations.md)
+- [Users and Integrations](Documentation/users-integrations.md)
 
 ## License
 
