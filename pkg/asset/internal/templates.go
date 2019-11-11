@@ -806,8 +806,7 @@ data:
     .:53 {
         errors
         health
-        kubernetes cluster.local {{ .ServiceCIDR }}
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
+        kubernetes cluster.local {{ .ServiceCIDR }} {
             pods insecure
             upstream
             fallthrough in-addr.arpa ip6.arpa
