@@ -6,12 +6,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // checkpointConfigMapVolumes ensures that all pod configMaps are checkpointed locally, then converts the configMap volume to a hostpath.
-func (c *checkpointer) checkpointConfigMapVolumes(pod *v1.Pod) (*v1.Pod, error) {
+func (c *checkpointer) checkpointConfigMapVolumes(pod *corev1.Pod) (*corev1.Pod, error) {
 	uid, gid, err := podUserAndGroup(pod)
 	if err != nil {
 		return nil, fmt.Errorf("failed to checkpoint configMap for pod %s/%s: %v", pod.Namespace, pod.Name, err)
@@ -35,7 +35,7 @@ func (c *checkpointer) checkpointConfigMapVolumes(pod *v1.Pod) (*v1.Pod, error) 
 // The path to the configMap data becomes: checkpointConfigMapPath/namespace/podname/configMapName/configMap.file
 // Where each "configMap.file" is a key from the configMap.Data field.
 func (c *checkpointer) checkpointConfigMap(namespace, podName, configMapName string, uid, gid int) (string, error) {
-	configMap, err := c.apiserver.Core().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
+	configMap, err := c.apiserver.CoreV1().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve configMap %s/%s: %v", namespace, configMapName, err)
 	}

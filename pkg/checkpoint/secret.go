@@ -6,12 +6,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // checkpointSecretVolumes ensures that all pod secrets are checkpointed locally, then converts the secret volume to a hostpath.
-func (c *checkpointer) checkpointSecretVolumes(pod *v1.Pod) (*v1.Pod, error) {
+func (c *checkpointer) checkpointSecretVolumes(pod *corev1.Pod) (*corev1.Pod, error) {
 	uid, gid, err := podUserAndGroup(pod)
 	if err != nil {
 		return nil, fmt.Errorf("failed to checkpoint secret for pod %s/%s: %v", pod.Namespace, pod.Name, err)
@@ -35,7 +35,7 @@ func (c *checkpointer) checkpointSecretVolumes(pod *v1.Pod) (*v1.Pod, error) {
 // The path to the secret data becomes: checkpointSecretPath/namespace/podname/secretName/secret.file
 // Where each "secret.file" is a key from the secret.Data field.
 func (c *checkpointer) checkpointSecret(namespace, podName, secretName string, uid, gid int) (string, error) {
-	secret, err := c.apiserver.Core().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	secret, err := c.apiserver.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve secret %s/%s: %v", namespace, secretName, err)
 	}
