@@ -5,7 +5,7 @@ export PATH:=$(PATH):$(PWD)
 LOCAL_OS:=$(shell uname | tr A-Z a-z)
 GOFILES:=$(shell find . -name '*.go' ! -path './vendor/*')
 VENDOR_GOFILES ?= $(shell find vendor -name '*.go')
-LDFLAGS=-X github.com/kubernetes-incubator/bootkube/pkg/version.Version=$(shell $(CURDIR)/build/git-version.sh)
+LDFLAGS=-X github.com/kubernetes-sigs/bootkube/pkg/version.Version=$(shell $(CURDIR)/build/git-version.sh)
 TERRAFORM:=$(shell command -v terraform 2> /dev/null)
 
 all: \
@@ -48,7 +48,7 @@ _output/bin/%: GOARCH=$(word 2, $(subst /, ,$*))
 _output/bin/%: GOARCH:=amd64  # default to amd64 to support release scripts
 _output/bin/%: $(GOFILES) $(VENDOR_GOFILES)
 	mkdir -p $(dir $@)
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $@ github.com/kubernetes-incubator/bootkube/cmd/$(notdir $@)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $@ github.com/kubernetes-sigs/bootkube/cmd/$(notdir $@)
 
 _output/release/bootkube.tar.gz: _output/bin/linux/bootkube _output/bin/darwin/bootkube _output/bin/linux/checkpoint
 	mkdir -p $(dir $@)
@@ -76,7 +76,7 @@ conformance-%: all
 
 #TODO: curl/sed "vendored" libs is gross - come up with something better
 vendor:
-	@dep ensure -v
+	@go mod vendor
 	@curl https://raw.githubusercontent.com/kubernetes/kubernetes/v1.13.3/pkg/kubelet/util/util.go | sed 's/^package util$$/package internal/' > pkg/checkpoint/internal/util.go
 	@curl https://raw.githubusercontent.com/kubernetes/kubernetes/v1.13.3/pkg/kubelet/util/util_unix.go | sed 's/^package util$$/package internal/' > pkg/checkpoint/internal/util_unix.go
 	@CGO_ENABLED=1 go build -o _output/bin/license-bill-of-materials ./vendor/github.com/coreos/license-bill-of-materials
