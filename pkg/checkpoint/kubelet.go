@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -21,7 +21,7 @@ type kubeletClient struct {
 func newKubeletClient(config *rest.Config) (*kubeletClient, error) {
 	// Use the core API group serializer. Same logic as client-go.
 	// https://github.com/kubernetes/client-go/blob/v3.0.0/kubernetes/typed/core/v1/core_client.go#L147
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
 
 	// Kubelet is using a self-signed cert.
 	config.TLSClientConfig.Insecure = true
@@ -48,8 +48,8 @@ func newKubeletClient(config *rest.Config) (*kubeletClient, error) {
 }
 
 // localParentPods will retrieve all pods from kubelet api that are parents & should be checkpointed
-func (k *kubeletClient) localParentPods() map[string]*v1.Pod {
-	podList := new(v1.PodList)
+func (k *kubeletClient) localParentPods() map[string]*corev1.Pod {
+	podList := new(corev1.PodList)
 	timeout := 15 * time.Second
 	if err := k.secureClient.Get().AbsPath("/pods/").Timeout(timeout).Do().Into(podList); err != nil {
 		glog.Errorf("failed to secure list local parent pods, fallback to insecure: %v", err)

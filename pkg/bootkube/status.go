@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -40,7 +40,7 @@ type statusController struct {
 	client        kubernetes.Interface
 	podStore      cache.Store
 	watchPods     []string
-	lastPodPhases map[string]v1.PodPhase
+	lastPodPhases map[string]corev1.PodPhase
 }
 
 func NewStatusController(c clientcmd.ClientConfig, pods []string) (*statusController, error) {
@@ -64,13 +64,13 @@ func (s *statusController) Run() {
 	podStore, podController := cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (runtime.Object, error) {
-				return s.client.Core().Pods("").List(options)
+				return s.client.CoreV1().Pods("").List(options)
 			},
 			WatchFunc: func(lo metav1.ListOptions) (watch.Interface, error) {
-				return s.client.Core().Pods("").Watch(options)
+				return s.client.CoreV1().Pods("").Watch(options)
 			},
 		},
-		&v1.Pod{},
+		&corev1.Pod{},
 		30*time.Minute,
 		cache.ResourceEventHandlerFuncs{},
 	)
@@ -98,15 +98,15 @@ func (s *statusController) AllRunning() (bool, error) {
 		if changed {
 			UserOutput("\tPod Status:%24s\t%s\n", p, s)
 		}
-		if s != v1.PodRunning {
+		if s != corev1.PodRunning {
 			running = false
 		}
 	}
 	return running, nil
 }
 
-func (s *statusController) PodStatus() (map[string]v1.PodPhase, error) {
-	status := make(map[string]v1.PodPhase)
+func (s *statusController) PodStatus() (map[string]corev1.PodPhase, error) {
+	status := make(map[string]corev1.PodPhase)
 
 	podNames := s.podStore.ListKeys()
 	for _, watchedPod := range s.watchPods {
@@ -125,7 +125,7 @@ func (s *statusController) PodStatus() (map[string]v1.PodPhase, error) {
 			status[watchedPod] = doesNotExist
 			continue
 		}
-		if p, ok := p.(*v1.Pod); ok {
+		if p, ok := p.(*corev1.Pod); ok {
 			status[watchedPod] = p.Status.Phase
 		}
 	}
