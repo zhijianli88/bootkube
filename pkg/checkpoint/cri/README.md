@@ -7,4 +7,4 @@ We copy generated CRI APIs for a couple reasons:
 The various versions of CRI are taken from:
 
 * v1alpha1: https://github.com/kubernetes/kubernetes/tree/v1.9.6/pkg/kubelet/apis/cri
-* v1alpha2: https://github.com/kubernetes/kubernetes/tree/v1.10.0-rc.1/pkg/kubelet/apis/cri
+* v1alpha2: https://github.com/kubernetes/cri-api/tree/release-1.16/pkg/apis
