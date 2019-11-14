@@ -66,7 +66,7 @@ func init() {
 	cmdRender.Flags().StringVar(&renderOpts.podCIDR, "pod-cidr", "10.2.0.0/16", "The CIDR range of cluster pods.")
 	cmdRender.Flags().StringVar(&renderOpts.serviceCIDR, "service-cidr", "10.3.0.0/24", "The CIDR range of cluster services.")
 	cmdRender.Flags().StringVar(&renderOpts.cloudProvider, "cloud-provider", "", "The provider for cloud services.  Empty string for no provider")
-	cmdRender.Flags().StringVar(&renderOpts.networkProvider, "network-provider", "flannel", "CNI network provider (flannel or experimental-canal or experimental-calico).")
+	cmdRender.Flags().StringVar(&renderOpts.networkProvider, "network-provider", "flannel", "CNI network provider (flannel, experimental-canal or experimental-calico).")
 }
 
 func runCmdRender(cmd *cobra.Command, args []string) error {
