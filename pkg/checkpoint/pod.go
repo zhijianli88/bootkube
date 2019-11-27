@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -24,11 +24,11 @@ var (
 			scheme.Scheme,
 			false, // don't pretty print.
 		),
-		v1.SchemeGroupVersion,
+		corev1.SchemeGroupVersion,
 	)
 )
 
-func sanitizeCheckpointPod(cp *v1.Pod) *v1.Pod {
+func sanitizeCheckpointPod(cp *corev1.Pod) *corev1.Pod {
 	trueVar := true
 
 	// Check if this is already sanitized, i.e. it was read back from a checkpoint on disk.
@@ -66,14 +66,17 @@ func sanitizeCheckpointPod(cp *v1.Pod) *v1.Pod {
 	// Remove affinity
 	cp.Spec.Affinity = nil
 
+	// Remove node selector
+	cp.Spec.NodeSelector = nil
+
 	// Sanitize the volumes
 	for i := range cp.Spec.Volumes {
 		v := &cp.Spec.Volumes[i]
 		if v.Secret != nil {
-			v.HostPath = &v1.HostPathVolumeSource{Path: secretPath(cp.Namespace, cp.Name, v.Secret.SecretName)}
+			v.HostPath = &corev1.HostPathVolumeSource{Path: secretPath(cp.Namespace, cp.Name, v.Secret.SecretName)}
 			v.Secret = nil
 		} else if v.ConfigMap != nil {
-			v.HostPath = &v1.HostPathVolumeSource{Path: configMapPath(cp.Namespace, cp.Name, v.ConfigMap.Name)}
+			v.HostPath = &corev1.HostPathVolumeSource{Path: configMapPath(cp.Namespace, cp.Name, v.ConfigMap.Name)}
 			v.ConfigMap = nil
 		}
 	}
@@ -88,25 +91,25 @@ func sanitizeCheckpointPod(cp *v1.Pod) *v1.Pod {
 // For example, the pod.Name would be "pod-checkpointer".
 // The podName would be "pod-checkpointer" or "pod-checkpointer-172.17.4.201" where
 // "172.17.4.201" is the nodeName.
-func isPodCheckpointer(pod *v1.Pod, cp CheckpointerPod) bool {
+func isPodCheckpointer(pod *corev1.Pod, cp CheckpointerPod) bool {
 	if pod.Namespace != cp.PodNamespace {
 		return false
 	}
 	return pod.Name == strings.TrimSuffix(cp.PodName, "-"+cp.NodeName)
 }
 
-func podListToParentPods(pl *v1.PodList) map[string]*v1.Pod {
+func podListToParentPods(pl *corev1.PodList) map[string]*corev1.Pod {
 	return podListToMap(pl, isValidParent)
 }
 
-func filterNone(p *v1.Pod) bool {
+func filterNone(p *corev1.Pod) bool {
 	return true
 }
 
-type filterFn func(*v1.Pod) bool
+type filterFn func(*corev1.Pod) bool
 
-func podListToMap(pl *v1.PodList, filter filterFn) map[string]*v1.Pod {
-	pods := make(map[string]*v1.Pod)
+func podListToMap(pl *corev1.PodList, filter filterFn) map[string]*corev1.Pod {
+	pods := make(map[string]*corev1.Pod)
 	for i := range pl.Items {
 		if !filter(&pl.Items[i]) {
 			continue
@@ -133,7 +136,7 @@ func podListToMap(pl *v1.PodList, filter filterFn) map[string]*v1.Pod {
 //    has the checkpoint=true annotation
 //    is not a static pod itself
 //    is not a checkpoint pod itself
-func isValidParent(pod *v1.Pod) bool {
+func isValidParent(pod *corev1.Pod) bool {
 	if pod.Annotations == nil {
 		return false
 	}
@@ -142,7 +145,7 @@ func isValidParent(pod *v1.Pod) bool {
 	return shouldCheckpoint && !isStatic && !isCheckpoint(pod)
 }
 
-func isCheckpoint(pod *v1.Pod) bool {
+func isCheckpoint(pod *corev1.Pod) bool {
 	if pod.Annotations == nil {
 		return false
 	}
@@ -150,7 +153,7 @@ func isCheckpoint(pod *v1.Pod) bool {
 	return ok
 }
 
-func podFullName(pod *v1.Pod) string {
+func podFullName(pod *corev1.Pod) string {
 	return pod.Namespace + "/" + pod.Name
 }
 
@@ -170,7 +173,7 @@ var ErrorConflictingSecurityContexts = errors.New("pod and/or container(s) have 
 // PodSecurityContext and the SecurityContexts of its Containers. Returns
 // ErrorConflictingSecurityContexts if the pod and/or its containers have different users/groups
 // set.
-func podUserAndGroup(pod *v1.Pod) (int, int, error) {
+func podUserAndGroup(pod *corev1.Pod) (int, int, error) {
 	var uid, gid *int64
 
 	// Check PodSecurityContext.
