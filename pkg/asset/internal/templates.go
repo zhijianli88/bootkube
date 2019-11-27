@@ -154,6 +154,13 @@ spec:
         - --authorization-mode=Node,RBAC
         - --bind-address=0.0.0.0
         - --client-ca-file=/etc/kubernetes/secrets/ca.crt
+        - --requestheader-client-ca-file=/etc/kubernetes/secrets/front-proxy-ca.crt
+        - --requestheader-allowed-names=front-proxy-client
+        - --requestheader-extra-headers-prefix=X-Remote-Extra-
+        - --requestheader-group-headers=X-Remote-Group
+        - --requestheader-username-headers=X-Remote-User
+        - --proxy-client-cert-file=/etc/kubernetes/secrets/front-proxy-client.crt
+        - --proxy-client-key-file=/etc/kubernetes/secrets/front-proxy-client.key
         - --cloud-provider={{ .CloudProvider }}
         - --enable-bootstrap-token-auth=true
 {{- if .EtcdUseTLS }}
