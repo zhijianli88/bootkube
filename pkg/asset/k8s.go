@@ -195,6 +195,9 @@ func newAPIServerSecretAsset(assets Assets, etcdUseTLS bool) (Asset, error) {
 		AssetPathAPIServerKey,
 		AssetPathAPIServerCert,
 		AssetPathServiceAccountPubKey,
+		AssetPathAggregatorCA,
+		AssetPathFrontProxyClientCert,
+		AssetPathFrontProxyClientKey,
 		AssetPathCACert,
 	}
 	if etcdUseTLS {

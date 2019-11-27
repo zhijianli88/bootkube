@@ -22,6 +22,34 @@ func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames 
 		return assets, err
 	}
 
+	aggregatorCAPrivKey, err := tlsutil.NewPrivateKey()
+	if err != nil {
+		return assets, err
+	}
+
+	cfg := tlsutil.CertConfig{
+		CommonName: "front-proxy",
+	}
+
+	aggregatorCACert, err := tlsutil.NewSelfSignedCACertificate(cfg, aggregatorCAPrivKey)
+	if err != nil {
+		return assets, err
+	}
+
+	frontProxyPrivKey, err := tlsutil.NewPrivateKey()
+	if err != nil {
+		return assets, err
+	}
+
+	cfg = tlsutil.CertConfig{
+		CommonName: "front-proxy-client",
+	}
+
+	frontProxyCert, err := tlsutil.NewSignedCertificate(cfg, frontProxyPrivKey, aggregatorCACert, aggregatorCAPrivKey)
+	if err != nil {
+		return assets, err
+	}
+
 	saPrivKey, err := tlsutil.NewPrivateKey()
 	if err != nil {
 		return assets, err
@@ -43,6 +71,9 @@ func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames 
 		{Name: AssetPathAPIServerKey, Data: tlsutil.EncodePrivateKeyPEM(apiKey)},
 		{Name: AssetPathAPIServerCert, Data: tlsutil.EncodeCertificatePEM(apiCert)},
 		{Name: AssetPathServiceAccountPrivKey, Data: tlsutil.EncodePrivateKeyPEM(saPrivKey)},
+		{Name: AssetPathAggregatorCA, Data: tlsutil.EncodeCertificatePEM(aggregatorCACert)},
+		{Name: AssetPathFrontProxyClientCert, Data: tlsutil.EncodeCertificatePEM(frontProxyCert)},
+		{Name: AssetPathFrontProxyClientKey, Data: tlsutil.EncodePrivateKeyPEM(frontProxyPrivKey)},
 		{Name: AssetPathServiceAccountPubKey, Data: saPubKey},
 		{Name: AssetPathAdminKey, Data: tlsutil.EncodePrivateKeyPEM(adminKey)},
 		{Name: AssetPathAdminCert, Data: tlsutil.EncodeCertificatePEM(adminCert)},
