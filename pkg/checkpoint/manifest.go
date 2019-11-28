@@ -8,14 +8,14 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
 // getFileCheckpoints will retrieve all checkpoint manifests from a given filepath.
-func getFileCheckpoints(path string) map[string]*v1.Pod {
-	checkpoints := make(map[string]*v1.Pod)
+func getFileCheckpoints(path string) map[string]*corev1.Pod {
+	checkpoints := make(map[string]*corev1.Pod)
 
 	fi, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -40,7 +40,7 @@ func getFileCheckpoints(path string) map[string]*v1.Pod {
 			continue
 		}
 
-		cp := &v1.Pod{}
+		cp := &corev1.Pod{}
 		if err := runtime.DecodeInto(scheme.Codecs.UniversalDecoder(), b, cp); err != nil {
 			glog.Errorf("Error unmarshalling manifest from %s: %v", filepath.Join(path, f.Name()), err)
 			continue
@@ -57,7 +57,7 @@ func getFileCheckpoints(path string) map[string]*v1.Pod {
 }
 
 // writeCheckpointManifest will save the pod to the inactive checkpoint location if it doesn't already exist.
-func writeCheckpointManifest(pod *v1.Pod) (bool, error) {
+func writeCheckpointManifest(pod *corev1.Pod) (bool, error) {
 	buff := &bytes.Buffer{}
 	if err := podSerializer.Encode(pod, buff); err != nil {
 		return false, err
