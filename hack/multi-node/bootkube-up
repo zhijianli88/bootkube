@@ -26,7 +26,7 @@ if [ ! -d "cluster" ]; then
   cp user-data.sample cluster/user-data-worker
   cp user-data.sample cluster/user-data-controller
   sed -i -e '/node.kubernetes.io\/master/d' cluster/user-data-worker
-  sed -i '' -e 's/node-role.kubernetes.io\/master/node.kubernetes.io\/master/g' cluster/manifests/*
+  sed -i -e 's/node-role.kubernetes.io\/master/node.kubernetes.io\/master/g' cluster/manifests/*
 fi
 
 # Start the VM

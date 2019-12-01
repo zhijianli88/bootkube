@@ -35,6 +35,8 @@ const (
 	AssetPathFrontProxyClientKey            = "tls/front-proxy-client.key"
 	AssetPathServiceAccountPrivKey          = "tls/service-account.key"
 	AssetPathServiceAccountPubKey           = "tls/service-account.pub"
+	AssetPathKubeletClientCert              = "tls/apiserver-kubelet-client.crt"
+	AssetPathKubeletClientKey               = "tls/apiserver-kubelet-client.key"
 	AssetPathAdminKey                       = "tls/admin.key"
 	AssetPathAdminCert                      = "tls/admin.crt"
 	AssetPathAdminKubeConfig                = "auth/kubeconfig"
