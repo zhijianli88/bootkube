@@ -11,6 +11,10 @@ import (
 	"github.com/kubernetes-sigs/bootkube/pkg/tlsutil"
 )
 
+// TLS organizations map to Kubernetes groups, and "system:masters"
+// is a well-known Kubernetes group that gives a user admin power.
+const orgSystemMasters = "system:masters"
+
 func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames tlsutil.AltNames) ([]Asset, error) {
 	var (
 		assets []Asset
@@ -115,7 +119,7 @@ func newAPIKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNa
 
 	config := tlsutil.CertConfig{
 		CommonName:   "kube-apiserver",
-		Organization: []string{"kube-master"},
+		Organization: []string{orgSystemMasters},
 		AltNames:     altNames,
 	}
 	cert, err := tlsutil.NewSignedCertificate(config, key, caCert, caPrivKey)
@@ -126,9 +130,6 @@ func newAPIKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNa
 }
 
 func newAdminKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey) (*rsa.PrivateKey, *x509.Certificate, error) {
-	// TLS organizations map to Kubernetes groups, and "system:masters"
-	// is a well-known Kubernetes group that gives a user admin power.
-	const orgSystemMasters = "system:masters"
 
 	key, err := tlsutil.NewPrivateKey()
 	if err != nil {
