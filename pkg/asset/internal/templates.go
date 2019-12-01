@@ -170,8 +170,8 @@ spec:
 {{- end }}
         - --etcd-servers={{ range $i, $e := .EtcdServers }}{{ if $i }},{{end}}{{ $e }}{{end}}
         - --insecure-port=0
-        - --kubelet-client-certificate=/etc/kubernetes/secrets/apiserver.crt
-        - --kubelet-client-key=/etc/kubernetes/secrets/apiserver.key
+        - --kubelet-client-certificate=/etc/kubernetes/secrets/apiserver-kubelet-client.crt
+        - --kubelet-client-key=/etc/kubernetes/secrets/apiserver-kubelet-client.key
         - --secure-port={{ (index .APIServers 0).Port }}
         - --service-account-key-file=/etc/kubernetes/secrets/service-account.pub
         - --service-cluster-ip-range={{ .ServiceCIDR }}
@@ -244,8 +244,8 @@ spec:
     - --etcd-keyfile=/etc/kubernetes/secrets/etcd-client.key
 {{- end }}
     - --etcd-servers={{ range $i, $e := .EtcdServers }}{{ if $i }},{{end}}{{ $e }}{{end}}
-    - --kubelet-client-certificate=/etc/kubernetes/secrets/apiserver.crt
-    - --kubelet-client-key=/etc/kubernetes/secrets/apiserver.key
+    - --kubelet-client-certificate=/etc/kubernetes/secrets/apiserver-kubelet-client.crt
+    - --kubelet-client-key=/etc/kubernetes/secrets/apiserver-kubelet-client.key
     - --secure-port={{ (index .APIServers 0).Port }}
     - --service-account-key-file=/etc/kubernetes/secrets/service-account.pub
     - --service-cluster-ip-range={{ .ServiceCIDR }}
