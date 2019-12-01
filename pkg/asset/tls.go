@@ -54,6 +54,16 @@ func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames 
 		return assets, err
 	}
 
+	kubeletClientCertConfig := tlsutil.CertConfig{
+		CommonName:   "apiserver-kubelet-client",
+		Organization: []string{orgSystemMasters},
+	}
+
+	kubeletClientKey, kubeletClientCert, err := newAdminKeyAndCert(caCert, caPrivKey, kubeletClientCertConfig)
+	if err != nil {
+		return assets, err
+	}
+
 	saPrivKey, err := tlsutil.NewPrivateKey()
 	if err != nil {
 		return assets, err
@@ -64,7 +74,11 @@ func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames 
 		return assets, err
 	}
 
-	adminKey, adminCert, err := newAdminKeyAndCert(caCert, caPrivKey)
+	adminCertConfig := tlsutil.CertConfig{
+		CommonName:   "admin",
+		Organization: []string{orgSystemMasters},
+	}
+	adminKey, adminCert, err := newAdminKeyAndCert(caCert, caPrivKey, adminCertConfig)
 	if err != nil {
 		return assets, err
 	}
@@ -78,6 +92,8 @@ func newTLSAssets(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNames 
 		{Name: AssetPathAggregatorCA, Data: tlsutil.EncodeCertificatePEM(aggregatorCACert)},
 		{Name: AssetPathFrontProxyClientCert, Data: tlsutil.EncodeCertificatePEM(frontProxyCert)},
 		{Name: AssetPathFrontProxyClientKey, Data: tlsutil.EncodePrivateKeyPEM(frontProxyPrivKey)},
+		{Name: AssetPathKubeletClientKey, Data: tlsutil.EncodePrivateKeyPEM(kubeletClientKey)},
+		{Name: AssetPathKubeletClientCert, Data: tlsutil.EncodeCertificatePEM(kubeletClientCert)},
 		{Name: AssetPathServiceAccountPubKey, Data: saPubKey},
 		{Name: AssetPathAdminKey, Data: tlsutil.EncodePrivateKeyPEM(adminKey)},
 		{Name: AssetPathAdminCert, Data: tlsutil.EncodeCertificatePEM(adminCert)},
@@ -119,7 +135,7 @@ func newAPIKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNa
 
 	config := tlsutil.CertConfig{
 		CommonName:   "kube-apiserver",
-		Organization: []string{orgSystemMasters},
+		Organization: []string{"kube-master"},
 		AltNames:     altNames,
 	}
 	cert, err := tlsutil.NewSignedCertificate(config, key, caCert, caPrivKey)
@@ -129,15 +145,11 @@ func newAPIKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, altNa
 	return key, cert, err
 }
 
-func newAdminKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey) (*rsa.PrivateKey, *x509.Certificate, error) {
+func newAdminKeyAndCert(caCert *x509.Certificate, caPrivKey *rsa.PrivateKey, config tlsutil.CertConfig) (*rsa.PrivateKey, *x509.Certificate, error) {
 
 	key, err := tlsutil.NewPrivateKey()
 	if err != nil {
 		return nil, nil, err
-	}
-	config := tlsutil.CertConfig{
-		CommonName:   "admin",
-		Organization: []string{orgSystemMasters},
 	}
 	cert, err := tlsutil.NewSignedCertificate(config, key, caCert, caPrivKey)
 	if err != nil {
