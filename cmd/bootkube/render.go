@@ -47,6 +47,7 @@ var (
 		serviceCIDR         string
 		cloudProvider       string
 		networkProvider     string
+		clusterName         string
 	}
 
 	imageVersions = asset.DefaultImages
@@ -67,6 +68,8 @@ func init() {
 	cmdRender.Flags().StringVar(&renderOpts.serviceCIDR, "service-cidr", "10.3.0.0/24", "The CIDR range of cluster services.")
 	cmdRender.Flags().StringVar(&renderOpts.cloudProvider, "cloud-provider", "", "The provider for cloud services.  Empty string for no provider")
 	cmdRender.Flags().StringVar(&renderOpts.networkProvider, "network-provider", "flannel", "CNI network provider (flannel, experimental-canal or experimental-calico).")
+	cmdRender.Flags().StringVar(&renderOpts.clusterName, "cluster-name", "", "The name of the kubernetes cluster.")
+
 }
 
 func runCmdRender(cmd *cobra.Command, args []string) error {
@@ -189,6 +192,7 @@ func flagsToAssetConfig() (c *asset.Config, err error) {
 	}
 
 	return &asset.Config{
+		ClusterName:     renderOpts.clusterName,
 		EtcdCACert:      etcdCACert,
 		EtcdClientCert:  etcdClientCert,
 		EtcdClientKey:   etcdClientKey,
