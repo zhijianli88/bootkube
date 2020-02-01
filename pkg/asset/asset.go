@@ -108,6 +108,7 @@ var (
 // AssetConfig holds all configuration needed when generating
 // the default set of assets.
 type Config struct {
+	ClusterName            string
 	EtcdCACert             *x509.Certificate
 	EtcdClientCert         *x509.Certificate
 	EtcdClientKey          *rsa.PrivateKey
