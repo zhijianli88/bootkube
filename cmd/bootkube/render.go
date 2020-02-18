@@ -64,12 +64,11 @@ func init() {
 	cmdRender.Flags().StringVar(&renderOpts.etcdServers, "etcd-servers", defaultEtcdServers, "List of etcd servers URLs including host:port, comma separated")
 	cmdRender.Flags().StringVar(&renderOpts.apiServers, "api-servers", "https://127.0.0.1:6443", "List of API server URLs including host:port, comma seprated")
 	cmdRender.Flags().StringVar(&renderOpts.altNames, "api-server-alt-names", "", "List of SANs to use in api-server certificate. Example: 'IP=127.0.0.1,IP=127.0.0.2,DNS=localhost'. If empty, SANs will be extracted from the --api-servers flag.")
-	cmdRender.Flags().StringVar(&renderOpts.podCIDR, "pod-cidr", "10.2.0.0/16", "The CIDR range of cluster pods.")
-	cmdRender.Flags().StringVar(&renderOpts.serviceCIDR, "service-cidr", "10.3.0.0/24", "The CIDR range of cluster services.")
+	cmdRender.Flags().StringVar(&renderOpts.podCIDR, "pod-cidr", "10.2.0.0/16", "The CIDR range(s) of cluster pods.  If dual-stack, IPv4 must come first, separated by a comma.")
+	cmdRender.Flags().StringVar(&renderOpts.serviceCIDR, "service-cidr", "10.3.0.0/24", "The CIDR range(s) of cluster services.  If dual-stack, IPv4 must come first, seprated by a comma.")
 	cmdRender.Flags().StringVar(&renderOpts.cloudProvider, "cloud-provider", "", "The provider for cloud services.  Empty string for no provider")
 	cmdRender.Flags().StringVar(&renderOpts.networkProvider, "network-provider", "flannel", "CNI network provider (flannel, experimental-canal or experimental-calico).")
 	cmdRender.Flags().StringVar(&renderOpts.clusterName, "cluster-name", "", "The name of the kubernetes cluster.")
-
 }
 
 func runCmdRender(cmd *cobra.Command, args []string) error {
@@ -134,28 +133,57 @@ func flagsToAssetConfig() (c *asset.Config, err error) {
 		}
 	}
 
-	_, podNet, err := net.ParseCIDR(renderOpts.podCIDR)
-	if err != nil {
-		return nil, err
+	var podNets, serviceNets []*net.IPNet
+
+	for _, cidr := range strings.Split(renderOpts.podCIDR, ",") {
+		_, podNet, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, err
+		}
+		podNets = append(podNets, podNet)
 	}
 
-	_, serviceNet, err := net.ParseCIDR(renderOpts.serviceCIDR)
-	if err != nil {
-		return nil, err
+	for _, cidr := range strings.Split(renderOpts.serviceCIDR, ",") {
+		_, serviceNet, err := net.ParseCIDR(cidr)
+		if err != nil {
+			return nil, err
+		}
+		serviceNets = append(serviceNets, serviceNet)
 	}
 
-	if podNet.Contains(serviceNet.IP) || serviceNet.Contains(podNet.IP) {
-		return nil, fmt.Errorf("Pod CIDR %s and service CIDR %s must not overlap", podNet.String(), serviceNet.String())
+	if len(podNets) != len(serviceNets) {
+		return nil, fmt.Errorf("number of service CIDRs (%d) must match the number of pod CIDRs (%d)", len(serviceNets), len(podNets))
 	}
 
-	apiServiceIP, err := offsetServiceIP(serviceNet, apiOffset)
-	if err != nil {
-		return nil, err
+	if len(podNets) > 2 || len(podNets) < 1 {
+		return nil, errors.New("kubernetes requires exactly 1 or 2 pod networks, and they must be of different address families")
 	}
 
-	dnsServiceIP, err := offsetServiceIP(serviceNet, dnsOffset)
-	if err != nil {
-		return nil, err
+	if len(serviceNets) > 2 || len(serviceNets) < 1 {
+		return nil, errors.New("kubernetes requires exactly 1 or 2 service networks, and they must be of different address families")
+	}
+
+	for _, podNet := range podNets {
+		for _, svcNet := range serviceNets {
+			if podNet.Contains(svcNet.IP) || svcNet.Contains(podNet.IP) {
+				return nil, fmt.Errorf("Pod CIDR %s and service CIDR %s must not overlap", podNet.String(), svcNet.String())
+			}
+		}
+	}
+
+	var apiServiceIPs, dnsServiceIPs []net.IP
+	for _, serviceNet := range serviceNets {
+		apiServiceIP, err := offsetServiceIP(serviceNet, apiOffset)
+		if err != nil {
+			return nil, err
+		}
+		apiServiceIPs = append(apiServiceIPs, apiServiceIP)
+
+		dnsServiceIP, err := offsetServiceIP(serviceNet, dnsOffset)
+		if err != nil {
+			return nil, err
+		}
+		dnsServiceIPs = append(dnsServiceIPs, dnsServiceIP)
 	}
 
 	etcdServers, err := parseURLs(renderOpts.etcdServers)
@@ -187,8 +215,8 @@ func flagsToAssetConfig() (c *asset.Config, err error) {
 	}
 
 	// TODO: Find better option than asking users to make manual changes
-	if serviceNet.IP.String() != defaultServiceBaseIP {
-		fmt.Printf("You have selected a non-default service CIDR %s - be sure your kubelet service file uses --cluster-dns=%s\n", serviceNet.String(), dnsServiceIP.String())
+	if serviceNets[0].IP.String() != defaultServiceBaseIP {
+		fmt.Printf("You have selected a non-default service CIDR %s - be sure your kubelet service file uses --cluster-dns=%s\n", serviceNets[0].String(), dnsServiceIPs[0].String())
 	}
 
 	return &asset.Config{
@@ -202,10 +230,10 @@ func flagsToAssetConfig() (c *asset.Config, err error) {
 		CAPrivKey:       caPrivKey,
 		APIServers:      apiServers,
 		AltNames:        altNames,
-		PodCIDR:         podNet,
-		ServiceCIDR:     serviceNet,
-		APIServiceIP:    apiServiceIP,
-		DNSServiceIP:    dnsServiceIP,
+		PodCIDRs:        podNets,
+		ServiceCIDRs:    serviceNets,
+		APIServiceIPs:   apiServiceIPs,
+		DNSServiceIPs:   dnsServiceIPs,
 		CloudProvider:   renderOpts.cloudProvider,
 		NetworkProvider: renderOpts.networkProvider,
 		Images:          imageVersions,
