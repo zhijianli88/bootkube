@@ -8,14 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/api/core/v1"
+	"github.com/kubernetes-sigs/bootkube/cmd/render/plugin/default/asset"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	rbac "k8s.io/api/rbac/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	"github.com/kubernetes-sigs/bootkube/pkg/asset"
 )
 
 const (
