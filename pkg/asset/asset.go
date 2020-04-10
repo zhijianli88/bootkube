@@ -161,7 +161,7 @@ type Config struct {
 // BindAllAddress indicates the address to use when binding all IPs.  If this
 // is an IPv6 or dual-stack system, `::` will be returned.  Otherwise
 // `0.0.0.0`.
-func (c *Config) BindAllAddress() string {
+func (c Config) BindAllAddress() string {
 	if containsNonLocalIPv6(c.APIServiceIPs) {
 		return "::"
 	}
@@ -169,23 +169,23 @@ func (c *Config) BindAllAddress() string {
 }
 
 // ServiceCIDRsString returns a "," concatenated string for the ServiceCIDRs
-func (c *Config) ServiceCIDRsString() string {
-	return joinStringsFromSliceOrSingle(stringerSlice(c.ServiceCIDRs), c.ServiceCIDR.String())
+func (c Config) ServiceCIDRsString() string {
+	return joinStringsFromSliceOrSingle(stringerSlice(c.ServiceCIDRs), c.ServiceCIDR)
 }
 
 // PodCIDRsString returns a "," concatenated string for the PodCIDRs
-func (c *Config) PodCIDRsString() string {
-	return joinStringsFromSliceOrSingle(stringerSlice(c.PodCIDRs), c.PodCIDR.String())
+func (c Config) PodCIDRsString() string {
+	return joinStringsFromSliceOrSingle(stringerSlice(c.PodCIDRs), c.PodCIDR)
 }
 
 // APIServiceIPsString returns a "," concatenated string for the APIServiceIPs
-func (c *Config) APIServiceIPsString() string {
-	return joinStringsFromSliceOrSingle(stringerSlice(c.APIServiceIPs), c.APIServiceIP.String())
+func (c Config) APIServiceIPsString() string {
+	return joinStringsFromSliceOrSingle(stringerSlice(c.APIServiceIPs), c.APIServiceIP)
 }
 
 // DNSServiceIPsString returns a "," concatenated string for the DNSServiceIPs
-func (c *Config) DNSServiceIPsString() string {
-	return joinStringsFromSliceOrSingle(stringerSlice(c.DNSServiceIPs), c.DNSServiceIP.String())
+func (c Config) DNSServiceIPsString() string {
+	return joinStringsFromSliceOrSingle(stringerSlice(c.DNSServiceIPs), c.DNSServiceIP)
 }
 
 func stringerSlice(in interface{}) []string {
@@ -217,11 +217,16 @@ func stringerSlice(in interface{}) []string {
 	return rval
 }
 
-func joinStringsFromSliceOrSingle(inSlice []string, inSingle string) string {
+func joinStringsFromSliceOrSingle(inSlice []string, inSingle fmt.Stringer) string {
 	if len(inSlice) > 0 {
 		return strings.Join(inSlice, ",")
 	}
-	return inSingle
+
+	if inSingle == nil {
+		return ""
+	}
+
+	return inSingle.String()
 }
 
 func containsNonLocalIPv6(in []net.IP) bool {
