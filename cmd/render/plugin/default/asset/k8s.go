@@ -10,7 +10,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/kubernetes-sigs/bootkube/pkg/asset/internal"
+	"github.com/kubernetes-sigs/bootkube/cmd/render/plugin/default/asset/internal"
 )
 
 const (
