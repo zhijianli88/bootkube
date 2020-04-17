@@ -1,6 +1,7 @@
 package bootkube
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -64,10 +65,10 @@ func (s *statusController) Run() {
 	podStore, podController := cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (runtime.Object, error) {
-				return s.client.CoreV1().Pods("").List(options)
+				return s.client.CoreV1().Pods("").List(context.TODO(), options)
 			},
 			WatchFunc: func(lo metav1.ListOptions) (watch.Interface, error) {
-				return s.client.CoreV1().Pods("").Watch(options)
+				return s.client.CoreV1().Pods("").Watch(context.TODO(), options)
 			},
 		},
 		&corev1.Pod{},

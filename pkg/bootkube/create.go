@@ -3,6 +3,7 @@ package bootkube
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -96,13 +97,13 @@ func apiTest(c clientcmd.ClientConfig) error {
 
 	// API Server is responding
 	healthStatus := 0
-	client.Discovery().RESTClient().Get().AbsPath("/healthz").Do().StatusCode(&healthStatus)
+	client.Discovery().RESTClient().Get().AbsPath("/healthz").Do(context.TODO()).StatusCode(&healthStatus)
 	if healthStatus != http.StatusOK {
 		return fmt.Errorf("API Server http status: %d", healthStatus)
 	}
 
 	// System namespace has been created
-	_, err = client.CoreV1().Namespaces().Get("kube-system", metav1.GetOptions{})
+	_, err = client.CoreV1().Namespaces().Get(context.TODO(), "kube-system", metav1.GetOptions{})
 	return err
 }
 
@@ -242,7 +243,7 @@ func (c *creater) waitForCRD(m manifest) error {
 	return wait.PollImmediate(crdRolloutDuration, crdRolloutTimeout, func() (bool, error) {
 		// get all resources, giving a 200 result with empty list on success, 404 before the CRD is active.
 		namespaceLessURI := allCustomResourcesURI(schema.GroupVersionResource{Group: crd.Spec.Group, Version: firstVer, Resource: crd.Spec.Names.Plural})
-		res := c.client.Get().RequestURI(namespaceLessURI).Do()
+		res := c.client.Get().RequestURI(namespaceLessURI).Do(context.TODO())
 		if res.Error() != nil {
 			if errors.IsNotFound(res.Error()) {
 				return false, nil
@@ -273,7 +274,7 @@ func (c *creater) create(m manifest) error {
 		AbsPath(m.urlPath(info.Name, info.Namespaced)).
 		Body(m.raw).
 		SetHeader("Content-Type", "application/json").
-		Do().Error()
+		Do(context.TODO()).Error()
 }
 
 func (m manifest) urlPath(plural string, namespaced bool) string {
