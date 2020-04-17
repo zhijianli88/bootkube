@@ -208,6 +208,15 @@ func (c *creater) createManifests(manifests []manifest) (ok bool) {
 	}
 
 	for _, m := range other {
+		// There are cases when a multi-doc YAML contains empty manifests. This
+		// is most often the case when using a templating enging that skips
+		// over a certain manifest in the case that a feature is diabled. This
+		// check is to allow for this. When decoded, the raw string becomes
+		// "null", so we check for that and skip the manifest if it is "null".
+		if string(m.raw) == "null" {
+			continue
+		}
+
 		if err := create(m); err != nil && c.strict {
 			return false
 		}
