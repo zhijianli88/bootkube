@@ -27,7 +27,11 @@ func WaitUntilPodsRunning(c clientcmd.ClientConfig, pods []string, timeout time.
 	if err != nil {
 		return err
 	}
-	sc.Run()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sc.Run(ctx)
 
 	if err := wait.Poll(5*time.Second, timeout, sc.AllRunning); err != nil {
 		return fmt.Errorf("error while checking pod status: %v", err)
@@ -56,7 +60,7 @@ func NewStatusController(c clientcmd.ClientConfig, pods []string) (*statusContro
 	return &statusController{client: client, watchPods: pods}, nil
 }
 
-func (s *statusController) Run() {
+func (s *statusController) Run(ctx context.Context) {
 	// TODO(yifan): Be more explicit about the labels so that we don't just
 	// reply on the prefix of the pod name when looking for the pods we are interested.
 	// E.g. For a scheduler pod, we will look for pods that has label `tier=control-plane`
@@ -65,10 +69,10 @@ func (s *statusController) Run() {
 	podStore, podController := cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (runtime.Object, error) {
-				return s.client.CoreV1().Pods("").List(context.TODO(), options)
+				return s.client.CoreV1().Pods("").List(ctx, options)
 			},
 			WatchFunc: func(lo metav1.ListOptions) (watch.Interface, error) {
-				return s.client.CoreV1().Pods("").Watch(context.TODO(), options)
+				return s.client.CoreV1().Pods("").Watch(ctx, options)
 			},
 		},
 		&corev1.Pod{},
@@ -76,7 +80,7 @@ func (s *statusController) Run() {
 		cache.ResourceEventHandlerFuncs{},
 	)
 	s.podStore = podStore
-	go podController.Run(wait.NeverStop)
+	go podController.Run(ctx.Done())
 }
 
 func (s *statusController) AllRunning() (bool, error) {
