@@ -1,13 +1,13 @@
 # etcd/clientv3
 
-[![Godoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/coreos/etcd/clientv3)
+[![Godoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/go.etcd.io/etcd/clientv3)
 
 `etcd/clientv3` is the official Go etcd client for v3.
 
 ## Install
 
 ```bash
-go get github.com/coreos/etcd/clientv3
+go get go.etcd.io/etcd/clientv3
 ```
 
 ## Get started
@@ -26,7 +26,7 @@ defer cli.Close()
 ```
 
 etcd v3 uses [`gRPC`](http://www.grpc.io) for remote procedure calls. And `clientv3` uses
-[`grpc-go`](https://github.com/grpc/grpc-go) to connect to etcd. Make sure to close the client after using it. 
+[`grpc-go`](https://github.com/grpc/grpc-go) to connect to etcd. Make sure to close the client after using it.
 If the client is not closed, the connection will have leaky goroutines. To specify client request timeout,
 pass `context.WithTimeout` to APIs:
 
@@ -78,8 +78,8 @@ The etcd client optionally exposes RPC metrics through [go-grpc-prometheus](http
 
 ## Namespacing
 
-The [namespace](https://godoc.org/github.com/coreos/etcd/clientv3/namespace) package provides `clientv3` interface wrappers to transparently isolate client requests to a user-defined prefix.
+The [namespace](https://godoc.org/go.etcd.io/etcd/clientv3/namespace) package provides `clientv3` interface wrappers to transparently isolate client requests to a user-defined prefix.
 
 ## Examples
 
-More code examples can be found at [GoDoc](https://godoc.org/github.com/coreos/etcd/clientv3).
+More code examples can be found at [GoDoc](https://godoc.org/go.etcd.io/etcd/clientv3).
