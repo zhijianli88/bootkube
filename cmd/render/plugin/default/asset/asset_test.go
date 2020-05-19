@@ -6,16 +6,26 @@ import (
 	"testing"
 )
 
+type f struct {
+	M string
+}
+
+func (f *f) String() string {
+	return f.M
+}
+
 func TestJoinStringsFromSliceOrSingle(t *testing.T) {
 	var out string
-	testSingle := "hello"
+
+	testSingle := &f{M: "hello"}
+	emptySingle := &f{M: ""}
 	testSlice := []string{"Hello", "World"}
 
-	if out = joinStringsFromSliceOrSingle(nil, testSingle); out != testSingle {
+	if out = joinStringsFromSliceOrSingle(nil, testSingle); out != testSingle.String() {
 		t.Errorf("single-only test failed: expected '%s', got '%s'", testSingle, out)
 	}
 
-	if out = joinStringsFromSliceOrSingle(testSlice, ""); out != strings.Join(testSlice, ",") {
+	if out = joinStringsFromSliceOrSingle(testSlice, emptySingle); out != strings.Join(testSlice, ",") {
 		t.Errorf("slice-only test failed: expected '%s', got '%s'", strings.Join(testSlice, ","), out)
 	}
 
@@ -23,7 +33,7 @@ func TestJoinStringsFromSliceOrSingle(t *testing.T) {
 		t.Errorf("single+slice test failed: expected '%s', got '%s'", strings.Join(testSlice, ","), out)
 	}
 
-	if out = joinStringsFromSliceOrSingle(nil, ""); out != "" {
+	if out = joinStringsFromSliceOrSingle(nil, emptySingle); out != "" {
 		t.Errorf("empty test failed: expected '%s', got '%s'", "", out)
 	}
 }

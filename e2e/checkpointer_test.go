@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -59,7 +60,7 @@ func testCheckpointerUnscheduleCheckpointer(t *testing.T) {
 
 	// Delete the pod checkpointer.
 	deletePropagationForeground := metav1.DeletePropagationForeground
-	if err := client.ExtensionsV1beta1().DaemonSets(testNS).Delete("test-checkpointer", &metav1.DeleteOptions{PropagationPolicy: &deletePropagationForeground}); err != nil {
+	if err := client.ExtensionsV1beta1().DaemonSets(testNS).Delete(context.TODO(), "test-checkpointer", metav1.DeleteOptions{PropagationPolicy: &deletePropagationForeground}); err != nil {
 		t.Fatalf("Failed to delete checkpointer: %v", err)
 	}
 
@@ -130,7 +131,7 @@ func testCheckpointerUnscheduleParent(t *testing.T) {
 
 	// Delete test pod on the workers.
 	patch := `{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/master":""}}}}}`
-	if _, err := client.ExtensionsV1beta1().DaemonSets(testNS).Patch("test-nginx", types.MergePatchType, []byte(patch)); err != nil {
+	if _, err := client.ExtensionsV1beta1().DaemonSets(testNS).Patch(context.TODO(), "test-nginx", types.MergePatchType, []byte(patch), metav1.PatchOptions{}); err != nil {
 		t.Fatalf("unable to patch daemonset: %v", err)
 	}
 
@@ -204,7 +205,7 @@ func createDaemonSet(namespace string, manifest []byte, c *Cluster) error {
 	if !ok {
 		return fmt.Errorf("expected manifest to decode into *api.Daemonset, got %T", ds)
 	}
-	if _, err := client.ExtensionsV1beta1().DaemonSets(namespace).Create(ds); err != nil {
+	if _, err := client.ExtensionsV1beta1().DaemonSets(namespace).Create(context.TODO(), ds, metav1.CreateOptions{}); err != nil {
 		return fmt.Errorf("failed to create the checkpoint parent: %v", err)
 	}
 	if err := verifyPod(c, ds.ObjectMeta.Name, true); err != nil {
@@ -317,7 +318,7 @@ func waitCluster(t *testing.T) *Cluster {
 
 func setupTestCheckpointerRole(namespace string) error {
 	// Copy special kubeconfig-in-cluster configmap from kube-system namespace.
-	kc, err := client.CoreV1().ConfigMaps(metav1.NamespaceSystem).Get("kubeconfig-in-cluster", metav1.GetOptions{})
+	kc, err := client.CoreV1().ConfigMaps(metav1.NamespaceSystem).Get(context.TODO(), "kubeconfig-in-cluster", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -325,19 +326,19 @@ func setupTestCheckpointerRole(namespace string) error {
 		Name:      kc.ObjectMeta.Name,
 		Namespace: namespace,
 	}
-	if _, err := client.CoreV1().ConfigMaps(namespace).Create(kc); err != nil {
+	if _, err := client.CoreV1().ConfigMaps(namespace).Create(context.TODO(), kc, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
-	if _, err := client.CoreV1().ServiceAccounts(namespace).Create(&v1.ServiceAccount{
+	if _, err := client.CoreV1().ServiceAccounts(namespace).Create(context.TODO(), &v1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-checkpointer",
 			Namespace: namespace,
 		},
-	}); err != nil {
+	}, metav1.CreateOptions{}); err != nil {
 		return err
 	}
-	if _, err := client.RbacV1beta1().Roles(namespace).Create(&rbac.Role{
+	if _, err := client.RbacV1beta1().Roles(namespace).Create(context.TODO(), &rbac.Role{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-checkpointer",
 			Namespace: namespace,
@@ -351,10 +352,10 @@ func setupTestCheckpointerRole(namespace string) error {
 			Resources: []string{"secrets", "configmaps"},
 			Verbs:     []string{"get"},
 		}},
-	}); err != nil {
+	}, metav1.CreateOptions{}); err != nil {
 		return err
 	}
-	if _, err := client.RbacV1beta1().RoleBindings(namespace).Create(&rbac.RoleBinding{
+	if _, err := client.RbacV1beta1().RoleBindings(namespace).Create(context.TODO(), &rbac.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-checkpointer",
 			Namespace: namespace,
@@ -369,7 +370,7 @@ func setupTestCheckpointerRole(namespace string) error {
 			Kind:     "Role",
 			Name:     "test-checkpointer",
 		},
-	}); err != nil {
+	}, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 	return nil
