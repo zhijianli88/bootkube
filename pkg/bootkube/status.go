@@ -161,7 +161,7 @@ func (s *statusController) allNodesReady() bool {
 	// Check node status to ensure all nodes are Ready
 	ns, err := s.NodeStatus()
 	if err != nil {
-		glog.Info("Error retrieving node conditions: %v", err)
+		glog.Infof("Error retrieving node conditions: %v", err)
 		return false
 	}
 
