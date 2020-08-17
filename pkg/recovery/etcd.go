@@ -18,19 +18,33 @@ import (
 	"github.com/kubernetes-sigs/bootkube/cmd/render/plugin/default/asset"
 )
 
+// TransformerFromStorage handles decryption and any other transformation from raw etcd value.
+type TransformerFromStorage func(value []byte) ([]byte, error)
+
+func identityTransformer(value []byte) ([]byte, error) {
+	return value, nil
+}
+
 // etcdBackend is a backend that extracts a controlPlane from an etcd instance.
 type etcdBackend struct {
 	client     *clientv3.Client
 	decoder    runtime.Decoder
 	pathPrefix string
+	tranformer TransformerFromStorage
 }
 
 // NewEtcdBackend constructs a new etcdBackend for the given client and pathPrefix.
 func NewEtcdBackend(client *clientv3.Client, pathPrefix string) Backend {
+	return NewEtcdBackendWithTransformer(client, pathPrefix, identityTransformer)
+}
+
+// NewEtcdBackendWithTransformer constructs a new etcdBackend for the given client, pathPrefix and transformer.
+func NewEtcdBackendWithTransformer(client *clientv3.Client, pathPrefix string, transformer TransformerFromStorage) Backend {
 	return &etcdBackend{
 		client:     client,
 		decoder:    scheme.Codecs.UniversalDecoder(),
 		pathPrefix: pathPrefix,
+		tranformer: transformer,
 	}
 }
 
@@ -75,8 +89,15 @@ func (s *etcdBackend) get(ctx context.Context, key string, out runtime.Object, i
 		}
 		return fmt.Errorf("key not found: %s", key)
 	}
+
 	kv := getResp.Kvs[0]
-	return decode(s.decoder, kv.Value, out)
+
+	value, err := s.tranformer(kv.Value)
+	if err != nil {
+		return err
+	}
+
+	return decode(s.decoder, value, out)
 }
 
 func (s *etcdBackend) getBytes(ctx context.Context, key string) ([]byte, error) {
@@ -89,7 +110,15 @@ func (s *etcdBackend) getBytes(ctx context.Context, key string) ([]byte, error) 
 	if len(getResp.Kvs) == 0 {
 		return nil, fmt.Errorf("key not found: %s", key)
 	}
-	return getResp.Kvs[0].Value, nil
+
+	kv := getResp.Kvs[0]
+
+	value, err := s.tranformer(kv.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
 }
 
 // list fetches a list runtime.Object from etcd located at key prefix `key`.
@@ -109,8 +138,12 @@ func (s *etcdBackend) list(ctx context.Context, key string, listObj runtime.Obje
 
 	elems := make([][]byte, len(getResp.Kvs))
 	for i, kv := range getResp.Kvs {
-		elems[i] = kv.Value
+		elems[i], err = s.tranformer(kv.Value)
+		if err != nil {
+			return err
+		}
 	}
+
 	return decodeList(elems, listPtr, s.decoder)
 }
 
