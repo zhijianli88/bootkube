@@ -201,7 +201,7 @@ func (c *creater) createManifests(manifests []manifest) (ok bool) {
 	for _, crd := range crds {
 		if err := c.waitForCRD(crd); err != nil {
 			ok = false
-			UserOutput("Failed waiting for %s: %v", crd, err)
+			UserOutput("Failed waiting for %s: %v\n", crd, err)
 			if c.strict {
 				return false
 			}
