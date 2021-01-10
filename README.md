@@ -19,7 +19,6 @@ Additionally, bootkube can be used to generate all of the necessary assets for u
 
 - [GCE Quickstart](hack/quickstart/quickstart-gce.md)
 - [AWS Quickstart](hack/quickstart/quickstart-aws.md)
-- [Bare-Metal](https://github.com/coreos/matchbox/tree/master/examples/terraform/bootkube-install)
 - [Vagrant Single-Node](hack/single-node/README.md)
 - [Vagrant Multi-Node](hack/multi-node/README.md)
 
