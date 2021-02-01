@@ -276,7 +276,7 @@ func allCustomResourcesURI(gvr schema.GroupVersionResource) string {
 func (c *creater) create(m manifest) error {
 	info, err := c.mapper.resourceInfo(m.apiVersion, m.kind)
 	if err != nil {
-		return fmt.Errorf("dicovery failed: %v", err)
+		return fmt.Errorf("discovery failed: %v", err)
 	}
 
 	return c.client.Post().
