@@ -29,6 +29,9 @@ func TestOffsetIP(t *testing.T) {
 			t.Errorf("unexpected CIDR parse error: %v", err)
 		}
 		ip, err := offsetServiceIP(cidr, c.offset)
+		if err != nil {
+			t.Errorf("unexpected offsetServiceIP() error: %v", err)
+		}
 		if ip.String() != c.expected {
 			t.Errorf("expected %s, got %s", c.expected, ip.String())
 		}
